@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow p-4">
+            <h2 class="mb-4 text-center">Detalhes da Operação #{{ operacao.id }}</h2>
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item"><strong>ID:</strong> {{ operacao.id }}</li>
+                <li class="list-group-item"><strong>Data:</strong> {{ operacao.data }}</li>
+                <li class="list-group-item"><strong>Código do Ativo:</strong> {{ operacao.ativo }}</li>
+                <li class="list-group-item"><strong>Quantidade:</strong> {{ operacao.quantidade }}</li>
+                <li class="list-group-item"><strong>Valor Unitário:</strong> R$ {{ "%.2f"|format(operacao.valor_unitario) }}</li>
+                <li class="list-group-item">
+                    <strong>Tipo de Operação:</strong> 
+                    <span class="badge bg-{{ 'success' if operacao.tipo_operacao == 'compra' else 'danger' }}">
+                        {{ operacao.tipo_operacao }}
+                    </span>
+                </li>
+                <li class="list-group-item"><strong>Valor Bruto:</strong> R$ {{ "%.2f"|format(operacao.valor_bruto) }}</li>
+                <li class="list-group-item"><strong>Taxas (0,03%):</strong> R$ {{ "%.2f"|format(operacao.taxas) }}</li>
+                <li class="list-group-item"><strong>Valor Líquido:</strong> R$ {{ "%.2f"|format(operacao.valor_liquido) }}</li>
+            </ul>
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('operacao.atualizar', id=operacao.id) }}" class="btn btn-warning text-white">✏️ Editar</a>
+                <form action="{{ url_for('operacao.excluir', id=operacao.id) }}" method="POST" onsubmit="return confirm('Tens a certeza absoluta que pretendes excluir esta operação?');">
+                    <button type="submit" class="btn btn-danger">🗑️ Excluir</button>
+                </form>
+                <a href="{{ url_for('operacao.listar') }}" class="btn btn-secondary">⬅️ Voltar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

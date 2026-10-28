@@ -5,7 +5,7 @@ import sqlite3
 from models.operacao import Operacao
 
 class OperacaoDAO:
-    # Construtor do DAO: define o nome do banco de dados (por defeito "corretora.db") e já garante que a tabela existe
+    # Construtor do DAO: define o nome do banco de dados e garante que a tabela existe
     def __init__(self, db_name="corretora.db"):
         self.db_name = db_name
         self.criar_tabela()
@@ -14,7 +14,7 @@ class OperacaoDAO:
     def conectar(self):
         return sqlite3.connect(self.db_name)
 
-    # Cria a tabela 'operacoes' no banco caso ela ainda não exista, com todas as colunas necessárias
+    # Cria a tabela 'operacoes' no banco caso ela ainda não exista, com todas as colunas exigidas
     def criar_tabela(self):
         conn = self.conectar()
         cursor = conn.cursor()
@@ -34,7 +34,7 @@ class OperacaoDAO:
         conn.commit()
         conn.close()
 
-    # Recebe um objeto de operação e insere os dados dele de forma segura na tabela do banco
+    # Insere uma nova operação na base de dados
     def inserir(self, operacao):
         conn = self.conectar()
         cursor = conn.cursor()
@@ -46,7 +46,7 @@ class OperacaoDAO:
         conn.commit()
         conn.close()
 
-    # Busca todas as operações guardadas no banco e converte cada linha numa instância da classe Operacao
+    # Lista todas as operações cadastradas
     def listar_todos(self):
         conn = self.conectar()
         cursor = conn.cursor()
@@ -69,3 +69,95 @@ class OperacaoDAO:
             op.valor_liquido = linha[8]
             operacoes.append(op)
         return operacoes
+
+    # Busca uma operação específica pelo ID
+    def buscar_por_id(self, operacao_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, data, ativo, quantidade, valor_unitario, tipo_operacao, valor_bruto, taxas, valor_liquido FROM operacoes WHERE id = ?", (operacao_id,))
+        linha = cursor.fetchone()
+        conn.close()
+        
+        if linha:
+            op = Operacao(
+                data=linha[1],
+                ativo=linha[2],
+                quantidade=linha[3],
+                valor_unitario=linha[4],
+                tipo_operacao=linha[5],
+                id=linha[0]
+            )
+            op.valor_bruto = linha[6]
+            op.taxas = linha[7]
+            op.valor_liquido = linha[8]
+            return op
+        return None
+
+    # Pesquisa operações pelo código do ativo
+    def buscar_por_ativo(self, ativo):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, data, ativo, quantidade, valor_unitario, tipo_operacao, valor_bruto, taxas, valor_liquido FROM operacoes WHERE ativo LIKE ?", (f"%{ativo.upper()}%",))
+        linhas = cursor.fetchall()
+        conn.close()
+        
+        operacoes = []
+        for linha in linhas:
+            op = Operacao(
+                data=linha[1],
+                ativo=linha[2],
+                quantidade=linha[3],
+                valor_unitario=linha[4],
+                tipo_operacao=linha[5],
+                id=linha[0]
+            )
+            op.valor_bruto = linha[6]
+            op.taxas = linha[7]
+            op.valor_liquido = linha[8]
+            operacoes.append(op)
+        return operacoes
+
+    # Pesquisa operações por intervalo de datas
+    def buscar_por_intervalo_datas(self, data_inicio, data_fim):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, data, ativo, quantidade, valor_unitario, tipo_operacao, valor_bruto, taxas, valor_liquido FROM operacoes WHERE data BETWEEN ? AND ?", (data_inicio, data_fim))
+        linhas = cursor.fetchall()
+        conn.close()
+        
+        operacoes = []
+        for linha in linhas:
+            op = Operacao(
+                data=linha[1],
+                ativo=linha[2],
+                quantidade=linha[3],
+                valor_unitario=linha[4],
+                tipo_operacao=linha[5],
+                id=linha[0]
+            )
+            op.valor_bruto = linha[6]
+            op.taxas = linha[7]
+            op.valor_liquido = linha[8]
+            operacoes.append(op)
+        return operacoes
+
+    # Atualiza uma operação existente (mantendo o ID intacto)
+    def atualizar(self, operacao):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE operacoes 
+            SET data = ?, ativo = ?, quantidade = ?, valor_unitario = ?, tipo_operacao = ?, valor_bruto = ?, taxas = ?, valor_liquido = ?
+            WHERE id = ?
+        """, (operacao.data, operacao.ativo, operacao.quantidade, operacao.valor_unitario, 
+              operacao.tipo_operacao, operacao.valor_bruto, operacao.taxas, operacao.valor_liquido, operacao.id))
+        conn.commit()
+        conn.close()
+
+    # Exclui uma operação pelo ID
+    def excluir(self, operacao_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM operacoes WHERE id = ?", (operacao_id,))
+        conn.commit()
+        conn.close()
