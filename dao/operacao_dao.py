@@ -1,14 +1,20 @@
+# Importa o módulo nativo sqlite3 para gerir a base de dados em SQL
 import sqlite3
+
+# Importa a classe Operacao para conseguir montar os objetos quando buscarmos os dados do banco
 from models.operacao import Operacao
 
 class OperacaoDAO:
+    # Construtor do DAO: define o nome do banco de dados (por defeito "corretora.db") e já garante que a tabela existe
     def __init__(self, db_name="corretora.db"):
         self.db_name = db_name
         self.criar_tabela()
 
+    # Função auxiliar para abrir a conexão com o banco SQLite
     def conectar(self):
         return sqlite3.connect(self.db_name)
 
+    # Cria a tabela 'operacoes' no banco caso ela ainda não exista, com todas as colunas necessárias
     def criar_tabela(self):
         conn = self.conectar()
         cursor = conn.cursor()
@@ -28,6 +34,7 @@ class OperacaoDAO:
         conn.commit()
         conn.close()
 
+    # Recebe um objeto de operação e insere os dados dele de forma segura na tabela do banco
     def inserir(self, operacao):
         conn = self.conectar()
         cursor = conn.cursor()
@@ -39,6 +46,7 @@ class OperacaoDAO:
         conn.commit()
         conn.close()
 
+    # Busca todas as operações guardadas no banco e converte cada linha numa instância da classe Operacao
     def listar_todos(self):
         conn = self.conectar()
         cursor = conn.cursor()
