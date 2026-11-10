@@ -2,13 +2,13 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Lista de Operações</h2>
-    <a href="{{ url_for('operacao.cadastrar') }}" class="btn btn-success">➕ Nova Operação</a>
+    <a href="{{ url_for('cadastrar') }}" class="btn btn-success">➕ Nova Operação</a>
 </div>
 
 <!-- Caixa de Pesquisa -->
 <div class="card p-3 mb-4 shadow-sm">
     <h5 class="mb-3">Pesquisar Operações</h5>
-    <form method="GET" action="{{ url_for('operacao.listar') }}" class="row g-3">
+    <form method="GET" action="{{ url_for('listar') }}" class="row g-3">
         <div class="col-md-3">
             <select name="tipo_busca" class="form-select" onchange="this.form.submit()">
                 <option value="">Selecione o filtro...</option>
@@ -72,7 +72,7 @@
                 <td>R$ {{ "%.2f"|format(op.taxas) }}</td>
                 <td>R$ {{ "%.2f"|format(op.valor_liquido) }}</td>
                 <td>
-                    <a href="{{ url_for('operacao.detalhar', id=op.id) }}" class="btn btn-sm btn-info text-white">Ver Detalhes</a>
+                    <a href="{{ url_for('detalhar', id=op.id) }}" class="btn btn-sm btn-info text-white">Ver Detalhes</a>
                 </td>
             </tr>
             {% else %}
