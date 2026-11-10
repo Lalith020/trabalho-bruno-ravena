@@ -1,17 +1,13 @@
-# Importa o Blueprint para organizar as rotas e funções essenciais do Flask
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+# Ferramentas do Flask para ler formulários, mostrar páginas e redirecionar o usuário.
+from flask import render_template, request, redirect, url_for, flash
 
-# Importa o controller para chamar a lógica de negócio e BD
+# A rota conversa com o controller, que cuida das regras antes de acessar o banco.
 from controllers.operacao_controller import OperacaoController
 
-# Cria o Blueprint para as rotas de operação
-operacao_bp = Blueprint('operacao', __name__)
-
-# Instancia o controller
+# Uma central de atendimento: todas as rotas usam este controller.
 controller = OperacaoController()
 
-# Rota principal (Listagem e Pesquisas)
-@operacao_bp.route('/')
+# Página inicial: escolhe o tipo de busca ou lista tudo, como um menu de missões.
 def listar():
     # Verifica se o usuário está a fazer alguma pesquisa na barra de busca
     tipo_busca = request.args.get('tipo_busca')
@@ -31,8 +27,7 @@ def listar():
 
     return render_template('listar.html', operacoes=operacoes)
 
-# Rota para cadastrar nova operação
-@operacao_bp.route('/cadastrar', methods=['GET', 'POST'])
+# Recebe o formulário e pede ao controller para validar e cadastrar.
 def cadastrar():
     if request.method == 'POST':
         data = request.form.get('data')
@@ -40,34 +35,32 @@ def cadastrar():
         quantidade = request.form.get('quantidade')
         valor_unitario = request.form.get('valor_unitario')
         tipo_operacao = request.form.get('tipo_operacao')
-        
+
         sucesso, resultado = controller.cadastrar_operacao(data, ativo, quantidade, valor_unitario, tipo_operacao)
-        
+
         if sucesso:
             flash(resultado, 'success')
-            return redirect(url_for('operacao.listar'))
+            return redirect(url_for('listar'))
         else:
             for erro in resultado:
                 flash(erro, 'danger')
-                
+
     return render_template('cadastrar.html')
 
-# Rota para ver os detalhes de uma operação específica
-@operacao_bp.route('/detalhar/<int:id>')
+# Busca uma operação pelo ID e mostra sua ficha, como abrir o perfil de um personagem.
 def detalhar(id):
     operacao = controller.buscar_por_id(id)
     if not operacao:
         flash("Operação não encontrada.", "danger")
-        return redirect(url_for('operacao.listar'))
+        return redirect(url_for('listar'))
     return render_template('detalhar.html', operacao=operacao)
 
-# Rota para atualizar uma operação existente
-@operacao_bp.route('/atualizar/<int:id>', methods=['GET', 'POST'])
+# Carrega a operação e, no envio do formulário, pede ao controller para atualizá-la.
 def atualizar(id):
     operacao = controller.buscar_por_id(id)
     if not operacao:
         flash("Operação não encontrada.", "danger")
-        return redirect(url_for('operacao.listar'))
+        return redirect(url_for('listar'))
 
     if request.method == 'POST':
         data = request.form.get('data')
@@ -75,21 +68,29 @@ def atualizar(id):
         quantidade = request.form.get('quantidade')
         valor_unitario = request.form.get('valor_unitario')
         tipo_operacao = request.form.get('tipo_operacao')
-        
+
         sucesso, resultado = controller.atualizar_operacao(id, data, ativo, quantidade, valor_unitario, tipo_operacao)
-        
+
         if sucesso:
             flash(resultado, 'success')
-            return redirect(url_for('operacao.listar'))
+            return redirect(url_for('listar'))
         else:
             for erro in resultado:
                 flash(erro, 'danger')
 
     return render_template('atualizar.html', operacao=operacao)
 
-# Rota para excluir uma operação
-@operacao_bp.route('/excluir/<int:id>', methods=['POST', 'GET'])
+# Pede ao controller para excluir a operação indicada pelo ID.
 def excluir(id):
     controller.excluir_operacao(id)
     flash("Operação excluída com sucesso!", "success")
-    return redirect(url_for('operacao.listar'))
+    return redirect(url_for('listar'))
+
+
+# Registra cada endereço no Flask: este mapa conecta URLs às funções certas.
+def registrar_rotas(app):
+    app.add_url_rule('/', view_func=listar)
+    app.add_url_rule('/cadastrar', view_func=cadastrar, methods=['GET', 'POST'])
+    app.add_url_rule('/detalhar/<int:id>', view_func=detalhar)
+    app.add_url_rule('/atualizar/<int:id>', view_func=atualizar, methods=['GET', 'POST'])
+    app.add_url_rule('/excluir/<int:id>', view_func=excluir, methods=['GET', 'POST'])

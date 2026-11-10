@@ -21,11 +21,11 @@
                 <li class="list-group-item"><strong>Valor Líquido:</strong> R$ {{ "%.2f"|format(operacao.valor_liquido) }}</li>
             </ul>
             <div class="d-flex justify-content-between">
-                <a href="{{ url_for('operacao.atualizar', id=operacao.id) }}" class="btn btn-warning text-white">✏️ Editar</a>
-                <form action="{{ url_for('operacao.excluir', id=operacao.id) }}" method="POST" onsubmit="return confirm('Tens a certeza absoluta que pretendes excluir esta operação?');">
+                <a href="{{ url_for('atualizar', id=operacao.id) }}" class="btn btn-warning text-white">✏️ Editar</a>
+                <form action="{{ url_for('excluir', id=operacao.id) }}" method="POST" onsubmit="return confirm('Tens a certeza absoluta que pretendes excluir esta operação?');">
                     <button type="submit" class="btn btn-danger">🗑️ Excluir</button>
                 </form>
-                <a href="{{ url_for('operacao.listar') }}" class="btn btn-secondary">⬅️ Voltar</a>
+                <a href="{{ url_for('listar') }}" class="btn btn-secondary">⬅️ Voltar</a>
             </div>
         </div>
     </div>

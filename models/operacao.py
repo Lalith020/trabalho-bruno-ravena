@@ -1,11 +1,10 @@
-# Importa a biblioteca de expressões regulares (caso precise de validar algum padrão aqui dentro)
+# re permite conferir padrões de texto; datetime ajuda a trabalhar com datas.
 import re
 
-# Importa a biblioteca datetime para manipulação de datas
 from datetime import datetime
 
 class Operacao:
-    # Construtor da classe: inicializa os dados da operação e já calcula os valores financeiros automáticos
+    # Model: a ficha de cada operação, como a tela de status de um personagem.
     def __init__(self, data, ativo, quantidade, valor_unitario, tipo_operacao, id=None):
         self.id = id
         self.data = data
@@ -14,12 +13,12 @@ class Operacao:
         self.valor_unitario = float(valor_unitario) if valor_unitario else 0.0
         self.tipo_operacao = tipo_operacao.lower().strip() if tipo_operacao else ""
 
-        # Calcula o valor bruto multiplicando a quantidade pelo preço unitário
+        # Valor bruto: quantidade multiplicada pelo preço de cada unidade.
         self.valor_bruto = self.quantidade * self.valor_unitario
-        # Calcula as taxas aplicadas sobre o valor bruto (0,03%)
+        # Taxa de 0,03% calculada sobre o valor bruto.
         self.taxas = self.valor_bruto * 0.0003  # 0,03%
-        
-        # Define o valor líquido somando as taxas no caso de compra ou subtraindo no caso de venda
+
+        # Compra soma a taxa; venda desconta. O tipo define o cálculo final.
         if self.tipo_operacao == "compra":
             self.valor_liquido = self.valor_bruto + self.taxas
         elif self.tipo_operacao == "venda":
